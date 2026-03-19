@@ -1,0 +1,33 @@
+services:
+  
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: shortener
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  url-service:
+    build: ../services/url-service
+    depends_on: 
+      - mysql
+    ports:
+      - "8000:8000"
+  
+  analytics-service:
+    build: ../services/analytics-service
+    ports:
+      - "9000:9000"
+
+  frontend-dashboard:
+    build: ../services/frontend-dashboard
+    ports:
+      - "3000:3000"
