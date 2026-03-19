@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Helpers\ShortCode;
 use App\Models\Url;
@@ -30,16 +31,17 @@ class UrlController extends Controller
 
     public function redirect($code)
     {
+        $record = Url::where('short_code', $code)->firstOrFail();
+
         $url = Cache::get("url:$code");
 
         if (!$url) {
-            $record = Url::where('short_code', $code)->firstOrFail();
             $url = $record->original_url;
-
             Cache::put("url:$code", $url);
         }
 
-        Url::where('short_code', $code)->increment('clicks');
+        // ✅ increment correctly
+        $record->increment('clicks');
 
         return redirect($url);
     }

@@ -8,3 +8,7 @@ Route::get('/', function () {
 });
 Route::post('/shorten', [UrlController::class, 'shorten']);
 Route::get('/{code}', [UrlController::class, 'redirect']);
+
+Route::get('api/stats', function () {
+    return \App\Models\Url::select('short_code', 'clicks')->get();
+});
