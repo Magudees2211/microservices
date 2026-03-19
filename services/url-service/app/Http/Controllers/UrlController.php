@@ -31,17 +31,23 @@ class UrlController extends Controller
 
     public function redirect($code)
     {
-        $record = Url::where('short_code', $code)->firstOrFail();
+        $key = "visited:" . request()->ip() . ":" . $code;
+
+        if (!Cache::has($key)) {
+            $record = Url::where('short_code', $code)->firstOrFail();
+            $record->increment('clicks');
+
+            Cache::put($key, true, now()->addMinutes(1)); // prevent duplicate for 1 min
+        }
 
         $url = Cache::get("url:$code");
 
         if (!$url) {
+            $record = Url::where('short_code', $code)->firstOrFail();
             $url = $record->original_url;
+
             Cache::put("url:$code", $url);
         }
-
-        // ✅ increment correctly
-        $record->increment('clicks');
 
         return redirect($url);
     }
